@@ -1,7 +1,7 @@
 import autoPageview from './directives/auto-pageview'
 import trackEvent from '././directives/track-event'
 import trackPageview from '././directives/track-pageview'
-export default function install (Vue, options) {
+export default function install(Vue, options) {
   if (this.install.installed) return
 
   if (options.debug) {
@@ -17,8 +17,32 @@ export default function install (Vue, options) {
     if (options.autoPageview !== false) {
       options.autoPageview = true
     }
+    const ipcRenderer = options.ipcRenderer
+    ipcRenderer.on('vue-electron-baidu-analyze-reply', (_, arg) => {
+      window._hmt = window._hmt || []
+
+      let hm = document.createElement('script')
+      hm.text = arg
+
+      let head = document.getElementsByTagName('head')[0]
+      head.onload = () => {
+        // if the global object is exist, resolve the promise, otherwise reject it
+        if (window._hmt) {
+          this._resolve()
+        } else {
+          console.error('loadings ba statistics script failed, please check src and siteId')
+          return this._reject()
+        }
+        this._cache.forEach((cache) => {
+          window._hmt.push(cache)
+        })
+        this._cache = []
+      }
+      head.appendChild(hm)
+    })
+    ipcRenderer.send('vue-electron-baidu-analyze-message', siteId)
   } else {
-    siteId = options
+    return console.error(' options must be object')
   }
 
   if (!siteId) {
@@ -26,27 +50,7 @@ export default function install (Vue, options) {
   }
 
   this.install.installed = true
-  // insert baidu analystics scripts
-  const script = document.createElement('script')
-  const src = `https://hm.baidu.com/hm.js?` + siteId
-  const realSrc = options.src || src
-  script.innerHTML = 'var _hmt = _hmt || []; (function(){var hm = document.createElement(\'script\');hm.src="' +
-  realSrc +
-  '";var s = document.getElementsByTagName("script")[0];s.parentNode.insertBefore(hm, s);})()'
-  script.onload = () => {
-    // if the global object is exist, resolve the promise, otherwise reject it
-    if (window._hmt) {
-      this._resolve()
-    } else {
-      console.error('loading ba statistics script failed, please check src and siteId')
-      return this._reject()
-    }
-    this._cache.forEach((cache) => {
-      window._hmt.push(cache)
-    })
-    this._cache = []
-  }
-  document.body.appendChild(script)
+
   Object.defineProperty(Vue.prototype, '$ba', {
     get: () => this
   })

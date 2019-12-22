@@ -1,4 +1,5 @@
 import install from './install'
+import vebMain from './vebMain'
 
 const deferred = {}
 deferred.promise = new Promise((resolve, reject) => {
@@ -13,26 +14,26 @@ const methods = [
 
 const ba = {
   /**
-  * internal user only
-  */
+   * internal user only
+   */
   _cache: [],
   /**
    * internal user only, resolve the promise
    */
-  _resolve () {
+  _resolve() {
     deferred.resolve()
   },
   /**
-     * internal user only, reject the promise
-     */
-  _reject () {
+   * internal user only, reject the promise
+   */
+  _reject() {
     deferred.reject()
   },
 
-    /**
+  /**
    * push the args into _czc, or _cache if the script is not loaded yet
    */
-  _push (...args) {
+  _push(...args) {
     this.debug(args)
     if (window._hmt) {
       window._hmt.push(...args)
@@ -43,7 +44,7 @@ const ba = {
   /**
    * general method to create baidu analystics apis
    */
-  _createMethod (method) {
+  _createMethod(method) {
     return (...args) => {
       this._push([`_${method}`, ...args])
     }
@@ -52,11 +53,11 @@ const ba = {
   /**
    * debug
    */
-  debug () {},
+  debug() {},
   /**
    * the plugins is ready when the script is loaded
    */
-  ready () {
+  ready() {
     return deferred.promise
   },
   /**
@@ -65,9 +66,9 @@ const ba = {
 
   install,
   /**
-     * patch up to create new api
-     */
-  patch (method) {
+   * patch up to create new api
+   */
+  patch(method) {
     this[method] = this._createMethod(method)
   }
 }
@@ -79,4 +80,7 @@ if (window.Vue) {
   window.ba = ba
 }
 
-export default ba
+export {
+  ba,
+  vebMain
+}
