@@ -12,7 +12,7 @@ const methods = [
   'setCustomVar'
 ]
 
-const ba = {
+const veb = {
   /**
    * internal user only
    */
@@ -81,6 +81,6 @@ if (window.Vue) {
 }
 
 export {
-  ba,
+  veb,
   vebMain
 }
